@@ -1,8 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using System.Collections;
-
-// https://www.mongodb.com/docs/manual/tutorial/query-documents/
+﻿using MongoDB.Driver;
 
 namespace UpdateSubDocument
 {
@@ -54,7 +50,7 @@ namespace UpdateSubDocument
 
             TeamsCollection.InsertOne(teamDoc);
 
-            teamDoc = new() { TeamName = "GoldDigger", TeamCode = 1148 };
+            teamDoc = new() { TeamName = "GoldDiggers", TeamCode = 1148 };
 
             playerDoc = new() { PlayerName = "Gary" };
             playerDoc.AddColor("green");
