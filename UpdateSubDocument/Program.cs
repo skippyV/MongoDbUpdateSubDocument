@@ -1,4 +1,8 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+
+// https://stackoverflow.com/questions/79786685/mongodb-net-updating-embedded-document-in-list-with-filters-based-on-parent-and
 
 namespace UpdateSubDocument
 {
@@ -13,17 +17,25 @@ namespace UpdateSubDocument
 
             var collection = CreateTheDocs(iMongoDatabase);
 
-            var filterTeam = Builders<Team>.Filter.Eq("TeamName", "GoldDigger");
-
-            var filterPlayer = Builders<Player>.Filter.Eq("PlayerName", "Greg");
-
-         //   var combinedFilter = filterTeam & filterPlayer; // erroneous 
-
             List<string> newColors = new List<string>() { "peach", "periwinkle" };
 
-            UpdateDefinition<Player> updateDefinition = Builders<Player>.Update.Set(doc => doc.PlayerColors, newColors); 
+            var filterTeam = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
+            var filterPlayer = Builders<Player>.Filter.Eq("PlayerName", "Greg");
+            var filterTeamPlayers = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer);
+            var combinedFilter = filterTeam & filterTeamPlayers;
 
-     //       collection.UpdateOne(combinedFilter, updateDefinition);
+            UpdateDefinition<Team> updateDefinition = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
+
+            UpdateResult updateResult = collection.UpdateOne(combinedFilter, updateDefinition,
+                new UpdateOptions
+                {
+                    ArrayFilters = new ArrayFilterDefinition[] 
+                    {
+                        new BsonDocumentArrayFilterDefinition<Player>( new BsonDocument("p.PlayerName", "Greg") )
+                    }
+                });
+
+            Console.WriteLine("Update results of ModifiedCount: " + updateResult.ModifiedCount);
         }
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
