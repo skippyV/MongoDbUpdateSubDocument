@@ -3,7 +3,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 // https://stackoverflow.com/questions/79786685/mongodb-net-updating-embedded-document-in-list-with-filters-based-on-parent-and
-
+// https://stackoverflow.com/questions/78814121/mongodb-how-to-filter-and-update-on-a-child-of-a-child/78814123#78814123
 namespace UpdateSubDocument
 {
     public class Program
@@ -15,9 +15,30 @@ namespace UpdateSubDocument
             MongoClient? mongoClient = new MongoClient("mongodb://127.0.0.1:27017/");
             IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("BasicMongoDbTesting");
 
-            var collection = CreateTheDocs(iMongoDatabase);
+            var collection = CreateTheDocs(iMongoDatabase); // Create the Teams
+            FilterDefinition<Team> filterAllDocs = Builders<Team>.Filter.Empty;
+            IFindFluent<Team, Team> allDocsCollection = collection.Find(filterAllDocs);
+            List<Team> allDocs = allDocsCollection.ToList();
+
+            string GregsIdAsString = string.Empty;
+
+            foreach (Team doc in allDocs)
+            {
+                Console.WriteLine(doc.TeamName);
+                List<Player> players = doc.Players;
+                foreach (Player player in players)
+                {
+                    Console.WriteLine($"Player: {player.PlayerName} :: {player.Id}");
+                    if(player.PlayerName.Equals("Greg"))
+                    {
+                        GregsIdAsString = player.Id;
+                    }
+                }
+            }
 
             List<string> newColors = new List<string>() { "peach", "periwinkle" };
+
+            // AT THIS POINT Greg HAS COLORS gold and ganja
 
             var filterTeam = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
             var filterPlayer = Builders<Player>.Filter.Eq("PlayerName", "Greg");
@@ -29,9 +50,14 @@ namespace UpdateSubDocument
             UpdateResult updateResult = collection.UpdateOne(combinedFilter, updateDefinition,
                 new UpdateOptions
                 {
-                    ArrayFilters = new ArrayFilterDefinition[] 
+                    ArrayFilters = new ArrayFilterDefinition[]
                     {
-                        new BsonDocumentArrayFilterDefinition<Player>( new BsonDocument("p.PlayerName", "Greg") )
+                        new BsonDocumentArrayFilterDefinition<Player>
+                        (
+                           // new BsonDocument("p.PlayerName", "Greg")  // this works
+
+                          new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
+                        )
                     }
                 });
 
@@ -40,8 +66,18 @@ namespace UpdateSubDocument
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
         {
+            IMongoCollection<Team> TeamsCollection;
+
+            bool collectionExists = iMongoDatabase.ListCollectionNames().ToList().Contains("Teams");
+
+            if (collectionExists)
+            {
+                TeamsCollection = iMongoDatabase!.GetCollection<Team>("Teams");
+                iMongoDatabase.DropCollection("Teams");
+            }
+
             iMongoDatabase.CreateCollection("Teams");
-            IMongoCollection<Team> TeamsCollection = iMongoDatabase!.GetCollection<Team>("Teams");
+            TeamsCollection = iMongoDatabase!.GetCollection<Team>("Teams");
 
             Team teamDoc = new() { TeamName = "SandPipers", TeamCode = 5567 };
 
