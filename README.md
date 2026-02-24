@@ -7,6 +7,7 @@ criteria.
 
 https://stackoverflow.com/questions/79786685/mongodb-net-updating-embedded-document-in-list-with-filters-based-on-parent-a
 
+https://stackoverflow.com/questions/79895560/mongodb-net-update-subdocument-using-id-string-with-arrayfilterdefinition
 
 UPDATE: How to use the ID of a doc with the ArrayFilterDefinition 
 
@@ -19,7 +20,7 @@ UPDATE: How to use the ID of a doc with the ArrayFilterDefinition
 				(
 				   // new BsonDocument("p.PlayerName", "Greg")  // this works
 				  // new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
-				  new BsonDocument("p.Id", GregsIdAsString) // this also does not work.
+				  new BsonDocument("p.Id", GregsIdAsString) // this also does NOT work.
 				)
 			}
 		});
