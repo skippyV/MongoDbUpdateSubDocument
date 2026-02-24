@@ -18,7 +18,8 @@ UPDATE: How to use the ID of a doc with the ArrayFilterDefinition
 				new BsonDocumentArrayFilterDefinition<Player>
 				(
 				   // new BsonDocument("p.PlayerName", "Greg")  // this works
-				  new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
+				  // new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
+				  new BsonDocument("p.Id", GregsIdAsString) // this also does not work.
 				)
 			}
 		});

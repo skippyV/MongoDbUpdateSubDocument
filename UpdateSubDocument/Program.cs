@@ -45,6 +45,7 @@ namespace UpdateSubDocument
             var filterTeamPlayers = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer);
             var combinedFilter = filterTeam & filterTeamPlayers;
 
+            // NOW replace Greg's colors with peach and periwinkle
             UpdateDefinition<Team> updateDefinition = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
 
             UpdateResult updateResult = collection.UpdateOne(combinedFilter, updateDefinition,
@@ -54,9 +55,11 @@ namespace UpdateSubDocument
                     {
                         new BsonDocumentArrayFilterDefinition<Player>
                         (
-                           // new BsonDocument("p.PlayerName", "Greg")  // this works
+                            new BsonDocument("p.PlayerName", "Greg")  // this works
 
-                          new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
+                         // new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
+
+                         // new BsonDocument("p.Id", GregsIdAsString) // this also does not work.
                         )
                     }
                 });
