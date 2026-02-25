@@ -24,3 +24,9 @@ UPDATE: How to use the ID of a doc with the ArrayFilterDefinition
 				)
 			}
 		});
+		
+ANSWER:
+  new BsonDocument("p._id", ObjectId.Parse(GregsIdAsString))
+  
+Note the underscore and small case i for p._id. This syntax was not obvious to me. Figure it
+out using Trial and Error!
