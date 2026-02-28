@@ -51,8 +51,8 @@ namespace UpdateSubDocument
 
             // AT THIS POINT Greg HAS COLORS gold and ganja
 
-            var filter1Team = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
-            var filter1Player = Builders<Player>.Filter.Eq("PlayerName", "Greg");
+            var filter1Team = Builders<Team>.Filter.Eq("Id", TeamGoldDiggersIdAsString);
+            var filter1Player = Builders<Player>.Filter.Eq("Id", GregsIdAsString);
             var filter1TeamPlayers1 = Builders<Team>.Filter.ElemMatch(x => x.Players, filter1Player);
             var combinedFilter1 = filter1Team & filter1TeamPlayers1;
 
