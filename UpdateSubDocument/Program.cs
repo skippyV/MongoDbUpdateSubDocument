@@ -79,13 +79,13 @@ namespace UpdateSubDocument
 
             // https://stackoverflow.com/questions/77609329/delete-and-return-document-in-nested-array-with-mongodb-c-sharp-driver
 
-            var filter2Team = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
-            var filter2Player = Builders<Player>.Filter.Eq("PlayerName", "George");
+            var filter2Team = Builders<Team>.Filter.Eq("Id", TeamGoldDiggersIdAsString);
+            var filter2Player = Builders<Player>.Filter.Eq("Id", GeorgesIdAsString);
             var filter2TeamPlayers = Builders<Team>.Filter.ElemMatch(x => x.Players, filter2Player);
             var combinedFilter2 = filter2Team & filter2TeamPlayers;
 
-            UpdateResult res =  collection.UpdateOne(combinedFilter2,
-            Builders<Team>.Update.PullFilter(e => e.Players, filter2Player)
+            UpdateResult res =  collection.UpdateOne(combinedFilter2, 
+                Builders<Team>.Update.PullFilter(e => e.Players, filter2Player)
             );
 
             Console.WriteLine($"MatchedCount: {res.MatchedCount}, ModifiedCount: {res.ModifiedCount}");
