@@ -20,11 +20,18 @@ namespace UpdateSubDocument
             IFindFluent<Team, Team> allDocsCollection = collection.Find(filterAllDocs);
             List<Team> allDocs = allDocsCollection.ToList();
 
-            string GregsIdAsString = string.Empty;
+            string GregsIdAsString = string.Empty;    // Record to Update
+            string GeorgesIdAsString = string.Empty;  // Record to Delete
+            string TeamGoldDiggersIdAsString = string.Empty;
 
             foreach (Team doc in allDocs)
             {
                 Console.WriteLine(doc.TeamName);
+                if(doc.TeamName.Equals("GoldDiggers"))
+                {
+                    TeamGoldDiggersIdAsString = doc.Id;
+                }
+
                 List<Player> players = doc.Players;
                 foreach (Player player in players)
                 {
@@ -33,6 +40,10 @@ namespace UpdateSubDocument
                     {
                         GregsIdAsString = player.Id;
                     }
+                    if(player.PlayerName.Equals("George"))
+                    {
+                        GeorgesIdAsString = player.Id;
+                    }
                 }
             }
 
@@ -40,52 +51,43 @@ namespace UpdateSubDocument
 
             // AT THIS POINT Greg HAS COLORS gold and ganja
 
-            var filterTeam = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
-            var filterPlayer = Builders<Player>.Filter.Eq("PlayerName", "Greg");
-            var filterTeamPlayers = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer);
-            var combinedFilter = filterTeam & filterTeamPlayers;
+            var filterTeam1 = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
+            var filterPlayer1 = Builders<Player>.Filter.Eq("PlayerName", "Greg");
+            var filterTeamPlayers1 = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer1);
+            var combinedFilter1 = filterTeam1 & filterTeamPlayers1;
 
             // NOW replace Greg's colors with peach and periwinkle
-            UpdateDefinition<Team> updateDefinition = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
+            UpdateDefinition<Team> updateDefinition1 = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
 
-            //var bsonDocumentArrayFilterDefinition = new BsonDocumentArrayFilterDefinition<Player>
-            //            (
-            //            // new BsonDocument("p.PlayerName", "Greg")  // this works
-            //            //   new BsonDocument("p.Id", GregsIdAsString) // this does NOT work.
-            //            //   new BsonDocument("p._Id", GregsIdAsString) // this does NOT work.
-            //            // new BsonDocument("p._id", GregsIdAsString) // this does NOT work.
-            //            // new BsonDocument("p.id", GregsIdAsString) // this does NOT work.
-
-            //            // new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
-            //            // new BsonDocument("p.Id", ObjectId.Parse(GregsIdAsString))  // recommended by Nestor - but this also did not work.
-            //            new BsonDocument("p._id", ObjectId.Parse(GregsIdAsString)) // THE MAGIC SYNTAX
-            //            );
-
-            //var arryFilter = new ArrayFilterDefinition[] { bsonDocumentArrayFilterDefinition };
-
-            //var upOptions = new UpdateOptions { ArrayFilters = arryFilter  };
-            //var dbg = upOptions.IsUpsert;
-            //upOptions.IsUpsert = true; // shot in the dark - didn't matter
-
-            //UpdateResult updateResult = collection.UpdateOne(combinedFilter, updateDefinition,upOptions);
-
-            UpdateResult updateResult = collection.UpdateOne(combinedFilter, updateDefinition,
+            UpdateResult updateResult = collection.UpdateOne(combinedFilter1, updateDefinition1,
                 new UpdateOptions
                 {
                     ArrayFilters = new ArrayFilterDefinition[]
                     {
                         new BsonDocumentArrayFilterDefinition<Player>
                         (
-                         //   new BsonDocument("p.PlayerName", "Greg")  // this works
-                         // new BsonDocument("p.Id", GregsIdAsString) // this does NOT work.
-                         // new BsonDocument("p.Id", BsonValue.Create(GregsIdAsString))  // this does NOT work
-                         // new BsonDocument("p.Id", ObjectId.Parse(GregsIdAsString))  // recommended by Nestor - but this also did not work.
                          new BsonDocument("p._id", ObjectId.Parse(GregsIdAsString)) // THE MAGIC SYNTAX
                         )
                     }
                 });
 
             Console.WriteLine("Update results of ModifiedCount: " + updateResult.ModifiedCount);
+
+            // Now to delete a SubDocument
+
+            // https://stackoverflow.com/questions/77609329/delete-and-return-document-in-nested-array-with-mongodb-c-sharp-driver
+
+            var filterTeam2 = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
+            var filterPlayer2 = Builders<Player>.Filter.Eq("PlayerName", "Greg");
+            var filterTeamPlayers2 = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer2);
+            var combinedFilter2 = filterTeam2 & filterTeamPlayers2;
+
+            UpdateResult res =  collection.UpdateOne(combinedFilter2,
+            Builders<Team>.Update.PullFilter(e => e.Players, filterPlayer2)
+            );
+
+            Console.WriteLine($"MatchedCount: {res.MatchedCount}, ModifiedCount: {res.ModifiedCount}");
+
         }
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
