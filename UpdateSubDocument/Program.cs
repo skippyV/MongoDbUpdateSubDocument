@@ -51,10 +51,10 @@ namespace UpdateSubDocument
 
             // AT THIS POINT Greg HAS COLORS gold and ganja
 
-            var filterTeam1 = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
-            var filterPlayer1 = Builders<Player>.Filter.Eq("PlayerName", "Greg");
-            var filterTeamPlayers1 = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer1);
-            var combinedFilter1 = filterTeam1 & filterTeamPlayers1;
+            var filter1Team = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
+            var filter1Player = Builders<Player>.Filter.Eq("PlayerName", "Greg");
+            var filter1TeamPlayers1 = Builders<Team>.Filter.ElemMatch(x => x.Players, filter1Player);
+            var combinedFilter1 = filter1Team & filter1TeamPlayers1;
 
             // NOW replace Greg's colors with peach and periwinkle
             UpdateDefinition<Team> updateDefinition1 = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
@@ -73,20 +73,23 @@ namespace UpdateSubDocument
 
             Console.WriteLine("Update results of ModifiedCount: " + updateResult.ModifiedCount);
 
+            // At this point Greg's colors should have been changed
+
             // Now to delete a SubDocument
 
             // https://stackoverflow.com/questions/77609329/delete-and-return-document-in-nested-array-with-mongodb-c-sharp-driver
 
-            var filterTeam2 = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
-            var filterPlayer2 = Builders<Player>.Filter.Eq("PlayerName", "Greg");
-            var filterTeamPlayers2 = Builders<Team>.Filter.ElemMatch(x => x.Players, filterPlayer2);
-            var combinedFilter2 = filterTeam2 & filterTeamPlayers2;
+            var filter2Team = Builders<Team>.Filter.Eq("TeamName", "GoldDiggers");
+            var filter2Player = Builders<Player>.Filter.Eq("PlayerName", "George");
+            var filter2TeamPlayers = Builders<Team>.Filter.ElemMatch(x => x.Players, filter2Player);
+            var combinedFilter2 = filter2Team & filter2TeamPlayers;
 
             UpdateResult res =  collection.UpdateOne(combinedFilter2,
-            Builders<Team>.Update.PullFilter(e => e.Players, filterPlayer2)
+            Builders<Team>.Update.PullFilter(e => e.Players, filter2Player)
             );
 
             Console.WriteLine($"MatchedCount: {res.MatchedCount}, ModifiedCount: {res.ModifiedCount}");
+            Console.WriteLine("George Player record should now be gone");
 
         }
 
