@@ -4,6 +4,8 @@ using MongoDB.Driver.Linq;
 
 // https://stackoverflow.com/questions/79786685/mongodb-net-updating-embedded-document-in-list-with-filters-based-on-parent-and
 // https://stackoverflow.com/questions/78814121/mongodb-how-to-filter-and-update-on-a-child-of-a-child/78814123#78814123
+// https://stackoverflow.com/questions/56399090/push-an-item-to-a-deeply-nested-array-in-mongodb
+// https://stackoverflow.com/questions/79907980/mongodb-update-array-within-an-array-of-docs-using-id
 namespace UpdateSubDocument
 {
     public class Program
@@ -13,83 +15,15 @@ namespace UpdateSubDocument
             Console.WriteLine("Testing updating subdocument properties");
 
             MongoClient? mongoClient = new MongoClient("mongodb://127.0.0.1:27017/");
-            IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("BasicMongoDbTesting");
+            IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("UpdateSubDocumentTesting");            
 
-            var collection = CreateTheDocs(iMongoDatabase); // Create the Teams
-            FilterDefinition<Team> filterAllDocs = Builders<Team>.Filter.Empty;
-            IFindFluent<Team, Team> allDocsCollection = collection.Find(filterAllDocs);
-            List<Team> allDocs = allDocsCollection.ToList();
+            FirstAttempts firstAttempts = new();
+            IMongoCollection<Team> collection = CreateTheDocs(iMongoDatabase); // Create the Teams
+            //firstAttempts.RunCode(collection);
 
-            string GregsIdAsString = string.Empty;    // Record to Update
-            string GeorgesIdAsString = string.Empty;  // Record to Delete
-            string TeamGoldDiggersIdAsString = string.Empty;
-
-            foreach (Team doc in allDocs)
-            {
-                Console.WriteLine(doc.TeamName);
-                if(doc.TeamName.Equals("GoldDiggers"))
-                {
-                    TeamGoldDiggersIdAsString = doc.Id;
-                }
-
-                List<Player> players = doc.Players;
-                foreach (Player player in players)
-                {
-                    Console.WriteLine($"Player: {player.PlayerName} :: {player.Id}");
-                    if(player.PlayerName.Equals("Greg"))
-                    {
-                        GregsIdAsString = player.Id;
-                    }
-                    if(player.PlayerName.Equals("George"))
-                    {
-                        GeorgesIdAsString = player.Id;
-                    }
-                }
-            }
-
-            List<string> newColors = new List<string>() { "peach", "periwinkle" };
-
-            // AT THIS POINT Greg HAS COLORS gold and ganja
-
-            var filter1Team = Builders<Team>.Filter.Eq("Id", TeamGoldDiggersIdAsString);
-            var filter1Player = Builders<Player>.Filter.Eq("Id", GregsIdAsString);
-            var filter1TeamPlayers1 = Builders<Team>.Filter.ElemMatch(x => x.Players, filter1Player);
-            var combinedFilter1 = filter1Team & filter1TeamPlayers1;
-
-            // NOW replace Greg's colors with peach and periwinkle
-            UpdateDefinition<Team> updateDefinition1 = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
-
-            UpdateResult updateResult = collection.UpdateOne(combinedFilter1, updateDefinition1,
-                new UpdateOptions
-                {
-                    ArrayFilters = new ArrayFilterDefinition[]
-                    {
-                        new BsonDocumentArrayFilterDefinition<Player>
-                        (
-                         new BsonDocument("p._id", ObjectId.Parse(GregsIdAsString)) // THE MAGIC SYNTAX
-                        )
-                    }
-                });
-
-            Console.WriteLine("Update results of ModifiedCount: " + updateResult.ModifiedCount);
-
-            // At this point Greg's colors should have been changed
-
-            // Now to delete a SubDocument
-
-            // https://stackoverflow.com/questions/77609329/delete-and-return-document-in-nested-array-with-mongodb-c-sharp-driver
-
-            var filter2Team = Builders<Team>.Filter.Eq("Id", TeamGoldDiggersIdAsString);
-            var filter2Player = Builders<Player>.Filter.Eq("Id", GeorgesIdAsString);
-            var filter2TeamPlayers = Builders<Team>.Filter.ElemMatch(x => x.Players, filter2Player);
-            var combinedFilter2 = filter2Team & filter2TeamPlayers;
-
-            UpdateResult res =  collection.UpdateOne(combinedFilter2, 
-                Builders<Team>.Update.PullFilter(e => e.Players, filter2Player)
-            );
-
-            Console.WriteLine($"MatchedCount: {res.MatchedCount}, ModifiedCount: {res.ModifiedCount}");
-            Console.WriteLine("George Player record should now be gone");
+            SecondAttempt secondAttempt = new();
+            collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
+            secondAttempt.RunCode(collection);
 
         }
 
@@ -108,38 +42,49 @@ namespace UpdateSubDocument
             iMongoDatabase.CreateCollection("Teams");
             TeamsCollection = iMongoDatabase!.GetCollection<Team>("Teams");
 
-            Team teamDoc = new() { TeamName = "SandPipers", TeamCode = 5567 };
+            Team teamDoc = new()
+            {
+                TeamName = "SandPipers",
+                TeamCode = 5567,
+                Id = "000000000000000000001000",
+                TeamRatings = new int[] { 14, 16, 19 }
+            };
 
-            Player playerDoc = new() { PlayerName = "Suzie" };
+            Player playerDoc = new() { PlayerName = "Suzie", Id = "000000000000000000001001" };
             playerDoc.AddColor("black");
             playerDoc.AddColor("blue");
             teamDoc.AddPlayer(playerDoc);
 
-            playerDoc = new() { PlayerName = "Sandy" };
+            playerDoc = new() { PlayerName = "Sandy", Id = "000000000000000000001002" };
             playerDoc.AddColor("brown");
             playerDoc.AddColor("beige");
             teamDoc.AddPlayer(playerDoc);
 
-            playerDoc = new() { PlayerName = "Sally" };
+            playerDoc = new() { PlayerName = "Sally", Id = "000000000000000000001003" };
             playerDoc.AddColor("blonde");
             playerDoc.AddColor("bronze");
             teamDoc.AddPlayer(playerDoc);
 
             TeamsCollection.InsertOne(teamDoc);
 
-            teamDoc = new() { TeamName = "GoldDiggers", TeamCode = 1148 };
+            teamDoc = new() { 
+                TeamName = "GoldDiggers", 
+                TeamCode = 1148, 
+                Id = "000000000000000000002000",
+                TeamRatings = new int[] { 25, 22, 26 }
+            };
 
-            playerDoc = new() { PlayerName = "Gary" };
+            playerDoc = new() { PlayerName = "Gary", Id = "000000000000000000002001" };
             playerDoc.AddColor("green");
             playerDoc.AddColor("grey");
             teamDoc.AddPlayer(playerDoc);
 
-            playerDoc = new() { PlayerName = "Greg" };
+            playerDoc = new() { PlayerName = "Greg", Id = "000000000000000000002002" };
             playerDoc.AddColor("gold");
             playerDoc.AddColor("ganja");
             teamDoc.AddPlayer(playerDoc);
 
-            playerDoc = new() { PlayerName = "George" };
+            playerDoc = new() { PlayerName = "George", Id = "000000000000000000002003" };
             playerDoc.AddColor("gothBlack");
             playerDoc.AddColor("gothamGreen");
             teamDoc.AddPlayer(playerDoc);

@@ -12,6 +12,8 @@ namespace UpdateSubDocument
 
         public required int TeamCode { get; set; }
 
+        public int[] TeamRatings { get; set; }
+
         public List<Player> Players { get; set; } = [];
 
         public void AddPlayer(Player player)
