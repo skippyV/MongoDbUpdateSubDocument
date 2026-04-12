@@ -1,16 +1,9 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
 
 namespace UpdateSubDocument
 {
-    internal class SecondAttempt
+    internal class SecondTests
     {       
         public  void RunCode(IMongoCollection<Team> collection)
         {
@@ -60,7 +53,6 @@ namespace UpdateSubDocument
             //    JSON reader was expecting a value but found 'gothamGreen'.
             // var updatePullNestedColorA = Builders<Team>.Update.PullFilter<Team>("Players.$[z].PlayerColors", colorToPull);
 
-
             var updatePullNestedColorB = Builders<Team>.Update.Pull("Players.$[z].PlayerColors", colorToPull);
 
             arrayFilters = new[]
@@ -76,20 +68,6 @@ namespace UpdateSubDocument
             results = result.Result;
             Console.WriteLine($"MatchedCount: {results.MatchedCount}");
             Console.WriteLine($"ModifiedCount: {results.ModifiedCount}");
-
-            // And then some array value matching
-            //var filter = Builders<Member>.Filter.Eq(x => x.Id, 1)
-            //    & Builders<Member>.Filter.AnyEq(x => x.Friends, 3);
-            //await members.UpdateOneAsync(filter, update);
-
-            // BELOW WORKS WITH original Friend definition of an array[int]
-            //var filter = Builders<Member>.Filter.Eq("Id", "000000000000000000001001")
-            //   & Builders<Member>.Filter.AnyEq(x => x.Friends, 3);
-
-            //var update = Builders<Member>.Update.Set(x => x.Friends.FirstMatchingElement(), 10);
-
-            // TODO: Transpose the above code by using the Teams TeamRatings int array
-
         }
     }
 }

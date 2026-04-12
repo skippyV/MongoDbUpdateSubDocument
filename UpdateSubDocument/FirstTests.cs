@@ -1,15 +1,10 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UpdateSubDocument
 {
-    internal class FirstAttempts
+    internal class FirstTests
     {
 
         public void RunCode(IMongoCollection<Team> collection)
@@ -54,7 +49,7 @@ namespace UpdateSubDocument
             var filter1TeamPlayers1 = Builders<Team>.Filter.ElemMatch(x => x.Players, filter1Player);
             var combinedFilter1 = filter1Team & filter1TeamPlayers1;
 
-            // NOW replace Greg's colors with peach and periwinkle
+            // NOW replace Greg's colors with a new List of colors: peach and periwinkle
             UpdateDefinition<Team> updateDefinition1 = Builders<Team>.Update.Set(doc => doc.Players.AllMatchingElements("p").PlayerColors, newColors);
 
             UpdateResult updateResult = collection.UpdateOne(combinedFilter1, updateDefinition1,
@@ -71,7 +66,8 @@ namespace UpdateSubDocument
 
             Console.WriteLine("Update results of ModifiedCount: " + updateResult.ModifiedCount);
 
-            // At this point Greg's colors should have been changed
+            // At this point Greg's List of colors should have been changed.
+
 
             // Now to delete a SubDocument
 

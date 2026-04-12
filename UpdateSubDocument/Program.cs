@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+﻿using MongoDB.Driver;
 
 // https://stackoverflow.com/questions/79786685/mongodb-net-updating-embedded-document-in-list-with-filters-based-on-parent-and
 // https://stackoverflow.com/questions/78814121/mongodb-how-to-filter-and-update-on-a-child-of-a-child/78814123#78814123
@@ -17,13 +15,17 @@ namespace UpdateSubDocument
             MongoClient? mongoClient = new MongoClient("mongodb://127.0.0.1:27017/");
             IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("UpdateSubDocumentTesting");            
 
-            FirstAttempts firstAttempts = new();
+            FirstTests firstTests = new();
             IMongoCollection<Team> collection = CreateTheDocs(iMongoDatabase); // Create the Teams
             //firstAttempts.RunCode(collection);
 
-            SecondAttempt secondAttempt = new();
+            SecondTests secondTests = new();
             collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
-            secondAttempt.RunCode(collection);
+            //secondTests.RunCode(collection);
+
+            ThirdTests thirdTests = new();
+            collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
+            thirdTests.RunCode(collection);
 
         }
 
