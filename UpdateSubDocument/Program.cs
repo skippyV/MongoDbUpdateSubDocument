@@ -1,4 +1,9 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
+using Serilog;
+using Serilog.Core;
 
 // https://stackoverflow.com/questions/79786685/mongodb-net-updating-embedded-document-in-list-with-filters-based-on-parent-and
 // https://stackoverflow.com/questions/78814121/mongodb-how-to-filter-and-update-on-a-child-of-a-child/78814123#78814123
@@ -12,7 +17,22 @@ namespace UpdateSubDocument
         {
             Console.WriteLine("Testing updating subdocument properties");
 
-            MongoClient? mongoClient = new MongoClient("mongodb://127.0.0.1:27017/");
+            // Setup Serilog logging
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            //MongoClient? mongoClient = new MongoClient("mongodb://127.0.0.1:27017/");
+            MongoClientSettings settings = MongoClientSettings.FromConnectionString("mongodb://127.0.0.1:27017/");
+            settings.LoggingSettings = new LoggingSettings(serviceProvider.GetService<ILoggerFactory>());
+            ILogger<Program>? iLoggerForProgram = serviceProvider.GetService<ILogger<Program>>();
+            if (iLoggerForProgram is not null)
+            {
+                iLoggerForProgram!.LogInformation("Log in Progam.cs");
+            }
+
+            var mongoClient = new MongoClient(settings);
+
             IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("UpdateSubDocumentTesting");            
 
             FirstTests firstTests = new();
@@ -23,10 +43,17 @@ namespace UpdateSubDocument
             collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
             //secondTests.RunCode(collection);
 
-            ThirdTests thirdTests = new();
+            // Inject the Seriloger into ThirdTests class
+            ILogger<ThirdTests>? iLoggerForThirdTests = serviceProvider.GetService<ILogger<ThirdTests>>();
+            ThirdTests thirdTests = new ThirdTests(iLoggerForThirdTests);
+
             collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
             thirdTests.RunCode(collection);
 
+            // can I not just inject the same logger? Why am I creating the loggers using a class definition?
+            // Don't think I am structuring my logging correctly.
+            FourthTests fourthTests = new FourthTests(iLoggerForThirdTests);
+            fourthTests.RunCode(collection);
         }
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
@@ -94,6 +121,19 @@ namespace UpdateSubDocument
             TeamsCollection.InsertOne(teamDoc);
 
             return TeamsCollection;
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+
+            // services.AddLogging(configure => configure.AddSerilog());
+            // services.AddLogging(configure => configure.AddSerilog()).AddTransient<ILogger<MyClass>>();
+
+            Logger skippy = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File("UpdateSubDocument-LOG.txt").CreateLogger();
+
+            //services.AddLogging(configure => configure.AddSerilog(skippy)).AddTransient<SecondTests>(); // works too
+            services.AddLogging(configure => configure.AddSerilog(skippy));
+            services.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Debug);
         }
     }
 }
