@@ -121,11 +121,11 @@ namespace UpdateSubDocument
                 
 
             var arrayFilter1 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                // new BsonDocument($"{myIdentifier1}.PlayerName", new BsonDocument("$eq", "Gary"))  // Sanity check - using PlayerName instead of ID => successful update
                 // new BsonDocument($"{myIdentifier1}.Id", "000000000000000000002001")
                 // new BsonDocument($"{myIdentifier1}._id", "000000000000000000002001")
                 // new BsonDocument($"{myIdentifier1}.Id", new BsonDocument("$eq", "000000000000000000002001"))
-                // new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", "000000000000000000002001"))
-                new BsonDocument($"{myIdentifier1}.PlayerName", new BsonDocument("$eq", "Gary"))
+                new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", "000000000000000000002001"))
                 );
 
 
