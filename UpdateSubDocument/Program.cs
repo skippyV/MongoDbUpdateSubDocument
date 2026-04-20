@@ -76,7 +76,9 @@ namespace UpdateSubDocument
                 TeamName = "SandPipers",
                 TeamCode = 5567,
                 Id = "000000000000000000001000",
-                TeamRatings = new int[] { 14, 16, 19 }
+                TeamRatings = new int[] { 14, 16, 19 },
+                TeamOwners = new string[] { "Jerry", "Melissa", "Rihanna" },
+                TeamStats = new List<int>() { 34, 35, 36 }
             };
 
             Player playerDoc = new() { PlayerName = "Suzie", Id = "000000000000000000001001" };
@@ -100,7 +102,9 @@ namespace UpdateSubDocument
                 TeamName = "GoldDiggers", 
                 TeamCode = 1148, 
                 Id = "000000000000000000002000",
-                TeamRatings = new int[] { 25, 22, 26 }
+                TeamRatings = new int[] { 25, 22, 26 },
+                TeamOwners = new string[] { "Susan", "Bob", "Juan", "Skippy" },
+                TeamStats = new List<int>() { 52, 53, 54 }
             };
 
             playerDoc = new() { PlayerName = "Gary", Id = "000000000000000000002001" };
