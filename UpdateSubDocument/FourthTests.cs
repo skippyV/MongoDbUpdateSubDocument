@@ -118,14 +118,16 @@ namespace UpdateSubDocument
 
             filterTeam = Builders<Team>.Filter.Eq("Id", "000000000000000000002000");
             updateUsingArrayFilter = Builders<Team>.Update.Set($"Players.$[{myIdentifier1}].PlayerName", "Josh"); // let's just try 1 identifier
-                
 
+            // This post showed me the correct syntax:
+            //   https://stackoverflow.com/questions/79928841/mongodb-net-update-subdocument-using-id-within-arrayfilter
             var arrayFilter1 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
                 // new BsonDocument($"{myIdentifier1}.PlayerName", new BsonDocument("$eq", "Gary"))  // Sanity check - using PlayerName instead of ID => successful update
                 // new BsonDocument($"{myIdentifier1}.Id", "000000000000000000002001")
                 // new BsonDocument($"{myIdentifier1}._id", "000000000000000000002001")
                 // new BsonDocument($"{myIdentifier1}.Id", new BsonDocument("$eq", "000000000000000000002001"))
-                new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", "000000000000000000002001"))
+                //new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", "000000000000000000002001"))
+                new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", ObjectId.Parse("000000000000000000002001")))
                 );
 
 
