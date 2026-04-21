@@ -130,18 +130,6 @@ namespace UpdateSubDocument
                 new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", ObjectId.Parse("000000000000000000002001")))
                 );
 
-
-            //updateUsingArrayFilter = Builders<Team>.Update.Set($"Players.$[{myIdentifier1}].PlayerColors.$[{myIdentifier2}]", "violet"); // using 2 identifiers - problem
-
-            
-            //var arrayFilter2 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
-            //    new BsonDocument($"{myIdentifier2}",  "grey"));
-
-            //var arrayFilter2 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
-            //    new BsonDocument($"{myIdentifier2}", new BsonDocument("$eq", "grey")));
-
-            //arrayFilters = new List<ArrayFilterDefinition> { arrayFilter1, arrayFilter2 };
-
             arrayFilters = new List<ArrayFilterDefinition> { arrayFilter1 };
 
             updateOptions = new UpdateOptions
@@ -158,6 +146,35 @@ namespace UpdateSubDocument
             iLogger.LogInformation($"MatchedCount: {result.MatchedCount}");
             iLogger.LogInformation($"ModifiedCount: {result.ModifiedCount}");
 
+            // Now to do an update with TWO identifiers
+
+            filterTeam = Builders<Team>.Filter.Eq("Id", "000000000000000000002000");
+
+            updateUsingArrayFilter = Builders<Team>.Update.Set($"Players.$[{myIdentifier1}].PlayerColors.$[{myIdentifier2}]", "violet");
+
+            arrayFilter1 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                new BsonDocument($"{myIdentifier1}._id", new BsonDocument("$eq", ObjectId.Parse("000000000000000000002001")))
+                );
+
+            var arrayFilter2 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                //new BsonDocument($"{myIdentifier2}", new BsonDocument("$eq", "grey")));// This also Works
+                new BsonDocument($"{myIdentifier2}", "grey")); // But this version looks more succint
+
+            arrayFilters = new List<ArrayFilterDefinition> { arrayFilter1, arrayFilter2 };
+
+            updateOptions = new UpdateOptions
+            {
+                ArrayFilters = arrayFilters
+            };
+
+            iLogger.LogInformation("In RunCode of FourthTests - Attempting UPDATE");
+
+            result = collection.UpdateOne(filterTeam, updateUsingArrayFilter, updateOptions);
+
+            Console.WriteLine($"MatchedCount: {result.MatchedCount}");
+            Console.WriteLine($"ModifiedCount: {result.ModifiedCount}");
+            iLogger.LogInformation($"MatchedCount: {result.MatchedCount}");
+            iLogger.LogInformation($"ModifiedCount: {result.ModifiedCount}");
         }
     }
 }
