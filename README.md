@@ -1,4 +1,4 @@
-This project demonstrates how update an embedded subdocument in MongoDB.
+This project demonstrates how to update an embedded subdocument in MongoDB.
 
 NOTE: This solution was provided by Yong Shun and will update the first
 record found that matches the filters. So you cannot use it if multiple

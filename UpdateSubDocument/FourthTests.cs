@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UpdateSubDocument
 {
@@ -18,25 +13,11 @@ namespace UpdateSubDocument
             this.iLogger = iLogger;
         }
 
-        // TODO Check list
-        // For Top Level class Team
-        // 1) Change value in the class. - Done
-        // 2) Change value in array of ints - Done
-        //    2b) Change value in array of strings
-        // 3) Create a List<> of primitives.
-        // 4) Change value in List<> of primitives. 
-        // 5) Repeat steps 1-4 for a specific Player of a specific Team's Players list.
-        // 6) Add a new class and make a list of it for each Player.
-        // 7) Repeat steps 1-4 for a specific subdocument in a specific Player.
-        //
-        // This testing has demonstrated that lists are treated as arrays in MonogDb
-        // so the code covers both scenarios.
-
         public void RunCode(IMongoCollection<Team> collection)
         {
             iLogger.LogInformation("In RunCode of FourthTests");
 
-            //    2b) Change value in array of strings
+            // Change value in array of strings in Team (top level object)
 
             var myIdentifier = "whatever";
 
@@ -61,7 +42,7 @@ namespace UpdateSubDocument
             iLogger.LogInformation($"MatchedCount: {result.MatchedCount}");
             iLogger.LogInformation($"ModifiedCount: {result.ModifiedCount}");
 
-            // 4) Change value in List<> of primitives. 
+            // Change value in List<int> in Team (top level object)
 
             filterTeam = Builders<Team>.Filter.Eq("Id", "000000000000000000002000");
 
@@ -84,8 +65,7 @@ namespace UpdateSubDocument
             iLogger.LogInformation($"MatchedCount: {result.MatchedCount}");
             iLogger.LogInformation($"ModifiedCount: {result.ModifiedCount}");
 
-            // 5) Repeat steps 1-4 for a specific Player of a specific Team's Players list.
-            //      Change value in List<> of primitives.
+            // NOW all tests will use ArrayFilter
 
             // LETS TRY SIMPLE FIRST
             // db.Teams.updateOne(
@@ -137,7 +117,7 @@ namespace UpdateSubDocument
                 ArrayFilters = arrayFilters
             };
 
-            iLogger.LogInformation("In RunCode of FourthTests - Attempting UPDATE");
+            iLogger.LogInformation("Calling UpdateOne for Player.PlayerName using an ArrayFilter");
 
             result = collection.UpdateOne(filterTeam, updateUsingArrayFilter, updateOptions);
 
@@ -167,7 +147,7 @@ namespace UpdateSubDocument
                 ArrayFilters = arrayFilters
             };
 
-            iLogger.LogInformation("In RunCode of FourthTests - Attempting UPDATE");
+            iLogger.LogInformation("Calling UpdateOne targeting a string within Player.PlayerColors");
 
             result = collection.UpdateOne(filterTeam, updateUsingArrayFilter, updateOptions);
 

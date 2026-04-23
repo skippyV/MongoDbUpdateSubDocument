@@ -12,9 +12,27 @@ namespace UpdateSubDocument
 
         public List<string> PlayerColors { get; set; } = [];
 
+        public List<Question> Questions { get; set; } = [];
+
         public void AddColor(string color)
         {
             PlayerColors.Add(color);
+        }
+
+        public void AddQuestion(Question question)
+        {
+            Questions.Add(question);
+        }
+
+        public void RemoveQuestion(int number)
+        {
+            // Questions.Remove(x => x.Number == number);// nope
+            var item = Questions.SingleOrDefault(x => x.Number == number);
+
+            if (item is not null)
+            {
+                Questions.Remove(item);
+            }            
         }
     }
 }
