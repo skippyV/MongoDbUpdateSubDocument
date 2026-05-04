@@ -14,6 +14,8 @@ namespace UpdateSubDocument
 
         public List<Question> Questions { get; set; } = [];
 
+        public List<Item> Bucket { get; set; } = [];
+
         public void AddColor(string color)
         {
             PlayerColors.Add(color);
@@ -22,6 +24,11 @@ namespace UpdateSubDocument
         public void AddQuestion(Question question)
         {
             Questions.Add(question);
+        }
+
+        public void AddItem(Item item) 
+        { 
+            Bucket.Add(item); 
         }
 
         public void RemoveQuestion(int number)

@@ -35,9 +35,9 @@ namespace UpdateSubDocument
 
             var filterTeam = Builders<Team>.Filter.Eq("Id", "000000000000000000001000");
 
-            var updateStringFilter = $"Players.$[{identifier1}].Questions.$[{identifier2}].ImageFileIds.$[{identifier3}]";
+            var updateFilterString = $"Players.$[{identifier1}].Questions.$[{identifier2}].ImageFileIds.$[{identifier3}]";
 
-            var updateUsingArrayFilter = Builders<Team>.Update.Set(updateStringFilter, "01234");
+            var updateUsingArrayFilter = Builders<Team>.Update.Set(updateFilterString, "01234");
 
             var arrayFilter1 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
                 new BsonDocument($"{identifier1}._id", new BsonDocument("$eq", ObjectId.Parse("000000000000000000001001")))
@@ -69,10 +69,10 @@ namespace UpdateSubDocument
 
             filterTeam = Builders<Team>.Filter.Eq("Id", "000000000000000000001000");
 
-            // updateStringFilter = $"Players.$[{identifier1}].Questions.$[{identifier2}].ImageFileIds.$[{identifier3}]";
-            updateStringFilter = $"Players.$[{identifier1}].Questions.$[{identifier2}].ImageFileIds";
+            // updateFilterString = $"Players.$[{identifier1}].Questions.$[{identifier2}].ImageFileIds.$[{identifier3}]";
+            updateFilterString = $"Players.$[{identifier1}].Questions.$[{identifier2}].ImageFileIds";
 
-            updateUsingArrayFilter = Builders<Team>.Update.AddToSet(updateStringFilter, "xxyyZZ");
+            updateUsingArrayFilter = Builders<Team>.Update.AddToSet(updateFilterString, "xxyyZZ");
 
             arrayFilter1 = new BsonDocumentArrayFilterDefinition<BsonDocument>(
                 new BsonDocument($"{identifier1}._id", new BsonDocument("$eq", ObjectId.Parse("000000000000000000001001")))

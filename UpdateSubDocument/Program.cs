@@ -77,6 +77,11 @@ namespace UpdateSubDocument
 
             FifthTests fifthTests = new FifthTests(serviceProvider.GetService<ILogger<FifthTests>>()!);
             fifthTests.RunCode(collection);
+
+            collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
+
+            SixthTests sixthTests = new SixthTests(serviceProvider.GetService<ILogger<SixthTests>>()!);
+            sixthTests.RunCode(collection);
         }
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
@@ -119,6 +124,11 @@ namespace UpdateSubDocument
             question.AddImageFileReference("003");
             question.AddImageFileReference("004");
             playerDoc.AddQuestion(question);
+
+            Item item = new() { LevelOneId = "Fruit", LevelTwoId = "Exotic", MyValue = 31 };
+            playerDoc.AddItem(item);
+            item = new() { LevelOneId = "Fruit", LevelTwoId = "Basic", MyValue = 52 };
+            playerDoc.AddItem(item);
 
             teamDoc.AddPlayer(playerDoc);
 
