@@ -39,8 +39,13 @@ namespace UpdateSubDocument
 
             // Setup Serilog logging
             var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            //ConfigureServices(serviceCollection);
+            Logger skippy = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File("UpdateSubDocument-LOG.txt").CreateLogger();
+            serviceCollection.AddLogging(configure => configure.AddSerilog(skippy));
+            serviceCollection.Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Debug);
+
+            ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider(); /// THIS I CANNOT SLIP INTO OPOV as it is.
+            // because this is a Console application and already has a service collection
 
             //MongoClient? mongoClient = new MongoClient("mongodb://127.0.0.1:27017/");
             MongoClientSettings settings = MongoClientSettings.FromConnectionString("mongodb://127.0.0.1:27017/");
@@ -82,6 +87,11 @@ namespace UpdateSubDocument
 
             SixthTests sixthTests = new SixthTests(serviceProvider.GetService<ILogger<SixthTests>>()!);
             sixthTests.RunCode(collection);
+
+            collection = CreateTheDocs(iMongoDatabase); // Re-Initialize the teams
+
+            SeventhTests seventhTests = new SeventhTests(serviceProvider.GetService<ILogger<SeventhTests>>()!);
+            seventhTests.RunCode(collection);
         }
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
