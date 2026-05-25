@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
 using Serilog;
 using Serilog.Core;
+using UpdateSubDocument.Data;
 
 // TODO Check list
 // For Top Level class Team
@@ -58,7 +59,8 @@ namespace UpdateSubDocument
 
             var mongoClient = new MongoClient(settings);
 
-            IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("UpdateSubDocumentTesting");            
+            IMongoDatabase? iMongoDatabase = mongoClient.GetDatabase("UpdateSubDocumentTesting");
+            IMongoDatabase? iMongoDatabase2 = mongoClient.GetDatabase("OpovDb");
 
             FirstTests firstTests = new();
             IMongoCollection<Team> collection = CreateTheDocs(iMongoDatabase); // Create the Teams
@@ -92,6 +94,14 @@ namespace UpdateSubDocument
 
             SeventhTests seventhTests = new SeventhTests(serviceProvider.GetService<ILogger<SeventhTests>>()!);
             seventhTests.RunCode(collection);
+
+            IMongoDatabase? iMongoDatabaseForOpov = mongoClient.GetDatabase("OpovDb");
+
+            IMongoCollection<UserAccessProfile> ProfileCollection = iMongoDatabaseForOpov!.GetCollection<UserAccessProfile>("UserAccessProfiles");
+
+            var ProfilesCollection = iMongoDatabase!.GetCollection<UserAccessProfile>("Teams");
+            EighthTests eighthTests = new EighthTests(serviceProvider.GetService<ILogger<EighthTests>>()!);
+            eighthTests.RunCode(collection, ProfileCollection);
         }
 
         public static IMongoCollection<Team> CreateTheDocs(IMongoDatabase? iMongoDatabase)
@@ -151,6 +161,13 @@ namespace UpdateSubDocument
             playerDoc.AddColor("blonde");
             playerDoc.AddColor("bronze");
             teamDoc.AddPlayer(playerDoc);
+
+            LaundryItem laundryItem = new() { name = "socks", UseBleach = true, UseSoap = false };
+            teamDoc.AddLaundryItem(laundryItem);
+            laundryItem = new() { name = "underwear", UseBleach = false, UseSoap = true };
+            teamDoc.AddLaundryItem(laundryItem);
+            laundryItem = new() { name = "socks", UseBleach = false, UseSoap = false };
+            teamDoc.AddLaundryItem(laundryItem);
 
             TeamsCollection.InsertOne(teamDoc);
 

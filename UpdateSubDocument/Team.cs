@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using UpdateSubDocument.Data;
 
 namespace UpdateSubDocument
 {
@@ -16,7 +17,9 @@ namespace UpdateSubDocument
 
         public string[] TeamOwners { get; set; }
 
-        public List<int> TeamStats { get; set; } = []; 
+        public List<int> TeamStats { get; set; } = [];
+
+        public List<LaundryItem> Laundry { get; set; } = [];
 
         public List<Player> Players { get; set; } = [];
 
@@ -24,5 +27,18 @@ namespace UpdateSubDocument
         {
             Players.Add(player);
         }
+
+        public void AddLaundryItem(LaundryItem laundryItem)
+        {
+            Laundry.Add(laundryItem);
+        }
+    }
+
+    public class LaundryItem
+    {
+        public string name { get; set; }
+        public bool UseBleach { get; set; }
+
+        public bool UseSoap {  get; set; }
     }
 }
